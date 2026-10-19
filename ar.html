@@ -1,16 +1,98 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAR Camera Test</title>
+
+    <!-- Hạ về thư viện A-Frame & MindAR phiên bản ổn định 1.2.2 -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-  </head>
-  <body style="margin: 0; overflow: hidden;">
-    <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/examples/image-tracking/assets/card-example/card.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-box position="0 0.25 0" material="color: red;" scale="0.5 0.5 0.5"></a-box>
-      </a-entity>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        /* Thẻ thông báo trạng thái phía trên màn hình */
+        #status-box {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: #00ffcc;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 99999;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            text-align: center;
+            border: 1px solid #00ffcc;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Khai báo trạng thái hiển thị -->
+    <div id="status-box">⏳ Đang khởi tạo Camera & Engine AR...</div>
+
+    <!-- Tắt UI loading mặc định bị treo bằng uiLoading: no -->
+    <a-scene 
+        id="ar-scene"
+        mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/examples/image-tracking/assets/card-example/card.mind; uiLoading: no; uiError: yes; uiScanning: yes;" 
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false">
+        
+        <a-assets>
+            <img id="card" src="https://raw.githubusercontent.com/hiukim/mind-ar-js/master/examples/image-tracking/assets/card-example/card.png" />
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <!-- Khi nhận diện tấm ảnh, hiện khối hộp đỏ và mặt phẳng card -->
+        <a-entity id="target-entity" mindar-image-target="targetIndex: 0">
+            <a-plane src="#card" position="0 0 0" height="0.552" width="1" rotation="0 0 0"></a-plane>
+            <a-box position="0 0.25 0.1" material="color: #ff0055;" scale="0.3 0.3 0.3"></a-box>
+        </a-entity>
     </a-scene>
-  </body>
+
+    <script>
+        const statusBox = document.getElementById('status-box');
+        const sceneEl = document.getElementById('ar-scene');
+        const targetEntity = document.getElementById('target-entity');
+
+        // Bắt sự kiện khi AR đã khởi tạo thành công
+        sceneEl.addEventListener("arReady", (event) => {
+            statusBox.style.color = "#00ff88";
+            statusBox.innerText = "✅ Camera sẵn sàng! Bắt đầu quét ảnh...";
+            setTimeout(() => {
+                statusBox.style.opacity = "0.5"; // Mờ bớt thanh trạng thái để dễ nhìn
+            }, 3000);
+        });
+
+        // Bắt sự kiện khi AR gặp lỗi (mạng, cản trở camera, WebGL)
+        sceneEl.addEventListener("arError", (event) => {
+            statusBox.style.color = "#ff4444";
+            statusBox.innerText = "❌ Lỗi: Không thể khởi động Camera hoặc WebGL!";
+        });
+
+        // Bắt sự kiện tìm thấy tấm ảnh Target
+        targetEntity.addEventListener("targetFound", (event) => {
+            statusBox.style.color = "#00ff88";
+            statusBox.style.opacity = "1";
+            statusBox.innerText = "🎉 ĐÃ TÌM THẤY TARGET! Hiển thị 3D...";
+        });
+
+        // Bắt sự kiện mất dấu tấm ảnh Target
+        targetEntity.addEventListener("targetLost", (event) => {
+            statusBox.style.color = "#ffbb00";
+            statusBox.innerText = "🔍 Hãy chiếu camera vào tấm ảnh trên máy tính...";
+        });
+    </script>
+</body>
 </html>
