@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAR Experience & Target Image</title>
+
+    <!-- Thư viện A-Frame và MindAR -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* GIAO DIỆN MÁY TÍNH (HIỂN THỊ MÃ QUÉT) */
+        #desktop-view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .card-container {
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            max-width: 480px;
+            width: 100%;
+            margin-top: 20px;
+            border: 1px solid #333;
+        }
+
+        .target-img {
+            width: 100%;
+            max-width: 360px;
+            border: 3px solid #00d2ff;
+            border-radius: 10px;
+            margin: 15px 0;
+            background: #ffffff;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .instructions {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #bbb;
+        }
+
+        /* GIAO DIỆN ĐIỆN THOẠI (CAMERA AR) */
+        #ar-view {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. GIAO DIỆN HIỂN THỊ TRÊN MÁY TÍNH -->
+    <div id="desktop-view">
+        <h1 style="margin-bottom: 5px; color: #00d2ff;">🎯 MÃ QUÉT AR TARGET</h1>
+        <p class="instructions">
+            Máy tính bàn không tích hợp camera để quét.<br>
+            Vui lòng dùng <b>điện thoại di động</b> mở cùng đường link đường dẫn này và chiếu camera vào bức ảnh bên dưới:
+        </p>
+        
+        <div class="card-container">
+            <!-- Ảnh Target AR mẫu -->
+            <img class="target-img" src="https://raw.githubusercontent.com/hiukim/mind-ar-js/master/examples/image-tracking/assets/card-example/card.png" alt="AR Target Image">
+        </div>
+    </div>
+
+    <!-- 2. GIAO DIỆN CAMERA WEBAR TRÊN ĐIỆN THOẠI -->
+    <div id="ar-view">
+        <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/examples/image-tracking/assets/card-example/card.mind;" 
+                 color-space="sRGB" 
+                 renderer="colorManagement: true, physicallyCorrectLights" 
+                 vr-mode-ui="enabled: false" 
+                 device-orientation-permission-ui="enabled: false">
+            
+            <a-assets>
+                <img id="card" src="https://raw.githubusercontent.com/hiukim/mind-ar-js/master/examples/image-tracking/assets/card-example/card.png" />
+            </a-assets>
+
+            <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+            <!-- Khối hộp màu đỏ 3D sẽ xuất hiện khi quét trúng ảnh -->
+            <a-entity mindar-image-target="targetIndex: 0">
+                <a-plane src="#card" position="0 0 0" height="0.552" width="1" rotation="0 0 0"></a-plane>
+                <a-box position="0 0.25 0.1" material="color: #ff0055;" scale="0.2 0.2 0.2"></a-box>
+            </a-entity>
+        </a-scene>
+    </div>
+
+    <script>
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            document.getElementById('ar-view').style.display = 'block';
+        } else {
+            document.getElementById('desktop-view').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
